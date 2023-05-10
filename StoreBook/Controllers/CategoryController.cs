@@ -1,20 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoreBook.Data;
 using StoreBook.Models;
+using StoreBook.Repository.IRepository;
 
 namespace StoreBook.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryController(ApplicationDbContext context)
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            this._context = context;
+            this._unitOfWork = unitOfWork;
         }
         public IActionResult Index()
         {
-            List<Category> categoryList = _context.Categories.ToList();
+            List<Category> categoryList = _unitOfWork.CategoryRepository.GetAll().ToList();
             return View(categoryList);
         }
 
@@ -26,8 +27,8 @@ namespace StoreBook.Controllers
         [HttpPost]
         public IActionResult Create(Category category)
         {
-            var categoryName = _context.Categories.FirstOrDefault(n => n.Name == category.Name);
-            var categoryDisplayOrder = _context.Categories.FirstOrDefault(d => d.DisplayOrder == category.DisplayOrder);
+            var categoryName = _unitOfWork.CategoryRepository.Get(n => n.Name == category.Name);
+            var categoryDisplayOrder = _unitOfWork.CategoryRepository.Get(d => d.DisplayOrder == category.DisplayOrder);
             if(categoryName != null)
             {
                 ModelState.AddModelError(key: "Name", errorMessage: "This name is already exist");
@@ -42,8 +43,8 @@ namespace StoreBook.Controllers
             }
             if (ModelState.IsValid)
             {
-                _context.Categories.Add(category);
-                _context.SaveChanges();
+                _unitOfWork.CategoryRepository.Add(category);
+                _unitOfWork.Save();
                 TempData["success"] = "Category has been created successfully";
                 return RedirectToAction(actionName: "Index", controllerName: "Category");
             }
@@ -56,7 +57,7 @@ namespace StoreBook.Controllers
             {
                 return NotFound();
             }
-            Category? category = _context.Categories.Find(id);
+            Category? category = _unitOfWork.CategoryRepository.Get(u => u.Id == id);
             if(category == null)
             {
                 return NotFound();
@@ -67,15 +68,15 @@ namespace StoreBook.Controllers
         [HttpPost]
         public IActionResult Edit(Category category)
         {
-            var comparer = _context.Categories.FirstOrDefault(n => n.Name == category.Name || n.DisplayOrder == category.DisplayOrder);
+            var comparer = _unitOfWork.CategoryRepository.Get(n => n.Name == category.Name || n.DisplayOrder == category.DisplayOrder);
             if(comparer != null)
             {
                 ModelState.AddModelError(key: "Name", errorMessage: "This category is already with such name or order");
             }
             if (ModelState.IsValid)
             {
-                _context.Categories.Update(category);
-                _context.SaveChanges();
+                _unitOfWork.CategoryRepository.Update(category);
+                _unitOfWork.Save();
                 TempData["success"] = "Category has been edited successfully";
                 return RedirectToAction(actionName: "Index", controllerName: "Category");
             }
@@ -88,7 +89,7 @@ namespace StoreBook.Controllers
             {
                 return NotFound();
             }
-            Category? category = _context.Categories.Find(id);
+            Category? category = _unitOfWork.CategoryRepository.Get(i => i.Id == id);
             if(category == null)
             {
                 return NotFound();
@@ -99,13 +100,13 @@ namespace StoreBook.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeletePOST(int? id)
         {
-            Category? category = _context.Categories.Find(id);
+            Category? category = _unitOfWork.CategoryRepository.Get(i => i.Id == id);
             if(category == null)
             {
                 return NotFound();
             }
-            _context.Categories.Remove(category);
-            _context.SaveChanges();
+            _unitOfWork.CategoryRepository.Remove(category);
+            _unitOfWork.Save();
             TempData["success"] = "Category has been deleted successfully";
             return RedirectToAction(actionName: "Index", controllerName: "Category");
         }
