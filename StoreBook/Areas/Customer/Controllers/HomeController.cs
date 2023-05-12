@@ -2,8 +2,9 @@
 using StoreBook.Models;
 using System.Diagnostics;
 
-namespace StoreBook.Controllers
+namespace StoreBook.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

@@ -3,8 +3,9 @@ using StoreBook.Data;
 using StoreBook.Models;
 using StoreBook.Repository.IRepository;
 
-namespace StoreBook.Controllers
+namespace StoreBook.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -29,15 +30,15 @@ namespace StoreBook.Controllers
         {
             var categoryName = _unitOfWork.CategoryRepository.Get(n => n.Name == category.Name);
             var categoryDisplayOrder = _unitOfWork.CategoryRepository.Get(d => d.DisplayOrder == category.DisplayOrder);
-            if(categoryName != null)
+            if (categoryName != null)
             {
                 ModelState.AddModelError(key: "Name", errorMessage: "This name is already exist");
             }
-            if(categoryDisplayOrder != null)
+            if (categoryDisplayOrder != null)
             {
                 ModelState.AddModelError(key: "DisplayOrder", errorMessage: "This order is already exist");
             }
-            if(category.Name == category.DisplayOrder.ToString())
+            if (category.Name == category.DisplayOrder.ToString())
             {
                 ModelState.AddModelError(key: "Name", errorMessage: "The Display order cannot exatly match the name");
             }
@@ -53,12 +54,12 @@ namespace StoreBook.Controllers
 
         public IActionResult Edit(int? id)
         {
-            if(id == null || id == 0)
+            if (id == null || id == 0)
             {
                 return NotFound();
             }
             Category? category = _unitOfWork.CategoryRepository.Get(u => u.Id == id);
-            if(category == null)
+            if (category == null)
             {
                 return NotFound();
             }
@@ -69,7 +70,7 @@ namespace StoreBook.Controllers
         public IActionResult Edit(Category category)
         {
             var comparer = _unitOfWork.CategoryRepository.Get(n => n.Name == category.Name || n.DisplayOrder == category.DisplayOrder);
-            if(comparer != null)
+            if (comparer != null)
             {
                 ModelState.AddModelError(key: "Name", errorMessage: "This category is already with such name or order");
             }
@@ -85,12 +86,12 @@ namespace StoreBook.Controllers
 
         public IActionResult Delete(int? id)
         {
-            if(id == 0 || id == 0)
+            if (id == 0 || id == 0)
             {
                 return NotFound();
             }
             Category? category = _unitOfWork.CategoryRepository.Get(i => i.Id == id);
-            if(category == null)
+            if (category == null)
             {
                 return NotFound();
             }
@@ -101,7 +102,7 @@ namespace StoreBook.Controllers
         public IActionResult DeletePOST(int? id)
         {
             Category? category = _unitOfWork.CategoryRepository.Get(i => i.Id == id);
-            if(category == null)
+            if (category == null)
             {
                 return NotFound();
             }
