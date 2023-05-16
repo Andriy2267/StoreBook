@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreBook.Models
 {
@@ -33,5 +34,10 @@ namespace StoreBook.Models
         [Range(1, 1000)]
         [Display(Name = "Price for 100+")]
         public double Price100 { get; set; }
+        public string ImageURL { get; set; }
+
+        public int CategoryId { get; set; }
+        [ForeignKey("CategoryId")]
+        public Category Category { get; set; }
     }
 }

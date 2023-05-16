@@ -30,7 +30,9 @@ namespace StoreBook.Data
                     Price = 3.0d,
                     ListPrice = 34.6d,
                     Price50 = 110.6d,
-                    Price100 = 180d
+                    Price100 = 180d,
+                    ImageURL = "",
+                    CategoryId = 9
                 },
                 new Product
                 {
@@ -42,7 +44,9 @@ namespace StoreBook.Data
                     Price = 3.0d,
                     ListPrice = 34.6d,
                     Price50 = 110.6d,
-                    Price100 = 180d
+                    Price100 = 180d,
+                    ImageURL = "",
+                    CategoryId = 9
                 },
                 new Product
                 {
@@ -54,7 +58,9 @@ namespace StoreBook.Data
                     Price = 3.0d,
                     ListPrice = 34.6d,
                     Price50 = 110.6d,
-                    Price100 = 180d
+                    Price100 = 180d,
+                    ImageURL = "",
+                    CategoryId = 10
                 }
                 );
         }

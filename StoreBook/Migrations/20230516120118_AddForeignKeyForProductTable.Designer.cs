@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StoreBook.Data;
 
@@ -10,9 +11,11 @@ using StoreBook.Data;
 namespace StoreBook.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230516120118_AddForeignKeyForProductTable")]
+    partial class AddForeignKeyForProductTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,10 +88,6 @@ namespace StoreBook.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageURL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<double>("ListPrice")
                         .HasColumnType("float");
 
@@ -119,7 +118,6 @@ namespace StoreBook.Migrations
                             CategoryId = 9,
                             Description = "Fantasy book for children and adult",
                             ISBN = "WWW999011YY",
-                            ImageURL = "",
                             ListPrice = 34.600000000000001,
                             Price = 3.0,
                             Price100 = 180.0,
@@ -133,7 +131,6 @@ namespace StoreBook.Migrations
                             CategoryId = 9,
                             Description = "Fantasy book for children and adult",
                             ISBN = "WWW999011YY",
-                            ImageURL = "",
                             ListPrice = 34.600000000000001,
                             Price = 3.0,
                             Price100 = 180.0,
@@ -147,7 +144,6 @@ namespace StoreBook.Migrations
                             CategoryId = 10,
                             Description = "Fantasy book for children and adult",
                             ISBN = "WWW999011YY",
-                            ImageURL = "",
                             ListPrice = 34.600000000000001,
                             Price = 3.0,
                             Price100 = 180.0,
