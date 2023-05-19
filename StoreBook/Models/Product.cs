@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreBook.Models
@@ -34,10 +35,15 @@ namespace StoreBook.Models
         [Range(1, 1000)]
         [Display(Name = "Price for 100+")]
         public double Price100 { get; set; }
+        [Display(Name ="Image URL")]
+        [Required(ErrorMessage ="Image URL is required")]
+        [ValidateNever]
         public string ImageURL { get; set; }
-
+        [Display(Name = "Category")]
+        [Required(ErrorMessage = "Category is required")]
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
+        [ValidateNever]
         public Category Category { get; set; }
     }
 }

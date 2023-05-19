@@ -3,6 +3,7 @@ using StoreBook.Repository.IRepository;
 using StoreBook.Models;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using StoreBook.ViewModels;
 
 namespace StoreBook.Areas.Admin.Controllers
 {
@@ -10,85 +11,90 @@ namespace StoreBook.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProductController(IUnitOfWork unitOfWork)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             this._unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
             List<Product> listOfProducts = _unitOfWork.ProductRepository.GetAll().ToList();
             return View(listOfProducts);
         }
-        public IActionResult Create()
+        public IActionResult Upsert(int? id)
         {
-            IEnumerable<SelectListItem> categoryList = _unitOfWork.CategoryRepository
-                .GetAll().Select(u => new SelectListItem
+            ProductVM productVM = new()
+            {
+                CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
-                });
-            ViewBag.CategoryList = categoryList;
-            return View();
+                }),
+                Product = new Product()
+            };
+            if (id == null || id == 0)
+            {
+                //create
+                return View(productVM);
+            }
+            else
+            {
+                //update
+                productVM.Product = _unitOfWork.ProductRepository.Get(u => u.Id == id);
+                return View(productVM);
+            }
+
         }
         [HttpPost]
-        public IActionResult Create(Product product)
+        public IActionResult Upsert(ProductVM productVM, IFormFile? formFile)
         {
-            var productName = _unitOfWork.ProductRepository.Get(n => n.Title == product.Title);
-            var productISBN = _unitOfWork.ProductRepository.Get(n => n.ISBN == product.ISBN);
-
-            if (productName != null)
-            {
-                ModelState.AddModelError(key: "Title", errorMessage: "This title already exist");
-            }
-            if(productISBN != null)
-            {
-                ModelState.AddModelError(key: "ISBN", errorMessage: "This ISBN already exist");
-            }
-            if(product.Title == product.ISBN)
-            {
-                ModelState.AddModelError(key: "Title", errorMessage: "The title cannot exatly match the ISBN");
-            }
             if(ModelState.IsValid)
             {
-                _unitOfWork.ProductRepository.Add(product);
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if(formFile != null)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(formFile.FileName);
+                    string productPath = Path.Combine(wwwRootPath, @"images\product");
+                    if(!string.IsNullOrEmpty(productVM.Product.ImageURL))
+                    {
+                        // delete the old image 
+                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageURL.TrimStart('\\'));
+
+                        if(System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                    }
+                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                    {
+                        formFile.CopyTo(fileStream);
+                    }
+
+                    productVM.Product.ImageURL = @"\images\product\" + fileName;
+                }
+                if(productVM.Product.Id == 0)
+                {
+                    _unitOfWork.ProductRepository.Add(productVM.Product);
+                }
+                else
+                {
+                    _unitOfWork.ProductRepository.Update(productVM.Product);
+                }
                 _unitOfWork.Save();
                 TempData["success"] = "Product has been created successfully";
                 return RedirectToAction(actionName: "Index", controllerName: "Product");
             }
-            return View();
-        }
-
-        public IActionResult Edit(int? id)
-        {
-            if(id == 0 || id == null)
+            else
             {
-                return NotFound();
+                productVM.CategoryList = _unitOfWork.CategoryRepository
+                    .GetAll().Select(u => new SelectListItem
+                    {
+                        Text = u.Name,
+                        Value = u.Id.ToString()
+                    });
+                return View(productVM);
             }
-            Product product = _unitOfWork.ProductRepository.Get(n => n.Id == id);
-            if(product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
-        [HttpPost]
-        public IActionResult Edit(Product product)
-        {
-            var comparerProduct = _unitOfWork.ProductRepository.Get(n => n.ISBN == product.ISBN ||
-            n.Title == product.Title);
-            if(comparerProduct != null)
-            {
-                ModelState.AddModelError(key: "Title", errorMessage: "Such etity is already exist");
-            }
-            if(ModelState.IsValid)
-            {
-                _unitOfWork.ProductRepository.Update(product);
-                _unitOfWork.Save();
-                TempData["success"] = "Product has been updated successfully";
-                return RedirectToAction(actionName: "Index", controllerName: "Product");
-            }
-            return View();
         }
 
         public IActionResult Delete(int? id)
