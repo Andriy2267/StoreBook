@@ -19,7 +19,7 @@ namespace StoreBook.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            List<Product> listOfProducts = _unitOfWork.ProductRepository.GetAll().ToList();
+            List<Product> listOfProducts = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
             return View(listOfProducts);
         }
         public IActionResult Upsert(int? id)
@@ -125,5 +125,14 @@ namespace StoreBook.Areas.Admin.Controllers
             return RedirectToAction(actionName: "Index", controllerName: "Product");
         }
 
+
+        #region API CALLS
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            List<Product> listOfProducts = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
+            return Json(new { data = listOfProducts });
+        }
+        #endregion
     }
 }
