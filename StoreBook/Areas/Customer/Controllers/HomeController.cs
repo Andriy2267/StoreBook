@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StoreBook.Models;
 using System.Diagnostics;
+using StoreBook.Repository.IRepository;
 
 namespace StoreBook.Areas.Customer.Controllers
 {
@@ -8,15 +9,17 @@ namespace StoreBook.Areas.Customer.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IUnitOfWork _unitOfWork;
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
         {
-            _logger = logger;
+            this._logger = logger;
+            this._unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
         {
-            return View();
+            IEnumerable<Product> productList = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category");
+            return View(productList);
         }
 
         public IActionResult Privacy()
